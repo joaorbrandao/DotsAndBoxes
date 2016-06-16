@@ -2,7 +2,7 @@ import java.awt.*;
 import java.net.*;
 import java.io.*;
 
-public class Protocolo implements Serializable{
+public class Protocol implements Serializable{
     private static final long serialVersionUID = 1L;
 
     Object arg1 = null;
@@ -19,8 +19,8 @@ public class Protocolo implements Serializable{
         out.reset();
     }
 
-    public static Protocolo recebe(ObjectInputStream in) throws Exception
+    public static Protocol recebe(ObjectInputStream in) throws Exception
     {
-        return (Protocolo)in.readObject();
+        return (Protocol)in.readObject();
     }
 }

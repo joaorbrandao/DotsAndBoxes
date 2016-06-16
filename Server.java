@@ -3,7 +3,7 @@ import java.net.*;
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
-//import org.apache.commons.lang.SerializationUtils;
+import java.util.*;
 
 public class Server{
 
@@ -15,12 +15,13 @@ public class Server{
 	protected ObjectInputStream  in[] = new ObjectInputStream[DIM];
 	protected ServerSocket SocketEscuta;
 	protected Socket [] sockets = new Socket[DIM];
-	protected Protocolo [] games = new Protocolo[DIM];
+	protected Protocol [] games = new Protocol[DIM];
 	public Player players[];
 	Thread one[];
 	int n = -1;
 	private Main controller;
 	private boolean gameOver;
+	public Date date;
 
 
 	public Server (int listenPort) throws IOException{
@@ -29,11 +30,9 @@ public class Server{
 		one = new Thread[DIM];
 		controller = new Main(false);
 		gameOver = false;
-		System.out.println("Running at: " + listenPort);
+		date = new Date();
+		System.out.println("----- " + date.toString() + " -----\n" + "Running at: " + listenPort);
 	}
-	/*public Server(){
-
-	}*/
 
 
 
@@ -84,8 +83,8 @@ public class Server{
 
 						do{
 							try{
-								games[eachClient] = new Protocolo();
-								games[eachClient] = Protocolo.recebe(in[eachClient]);
+								games[eachClient] = new Protocol();
+								games[eachClient] = Protocol.recebe(in[eachClient]);
 							}catch(Exception er){
 								er.printStackTrace();
 							}
@@ -125,20 +124,19 @@ public class Server{
 						//----- MSG PLAY -----start
 						while(!gameOver){
 							try{
-								games[eachClient] = new Protocolo();
-								games[eachClient] = Protocolo.recebe(in[eachClient]);//games[eachClient].recebe(in[eachClient]);	//Recebe coordenadas X e Y onde jogador clica
+								games[eachClient] = new Protocol();
+								games[eachClient] = Protocol.recebe(in[eachClient]);//games[eachClient].recebe(in[eachClient]);	//Recebe coordenadas X e Y onde jogador clica
 							}catch(Exception e){
 								e.printStackTrace();
 							}
 
 							if(games[eachClient].state.equals("TURN_FALSE")){
-								games[eachClient] = new Protocolo();
+								games[eachClient] = new Protocol();
 								games[eachClient].state = "OK";
 
 								games[eachClient].arg1 =  getController();
 
 								try{
-									//oos[eachClient].reset();
 									games[eachClient].envia(oos[eachClient]);
 
 								}catch(Exception e){
@@ -167,11 +165,11 @@ public class Server{
 
 								if(main[eachClient] == null){
 									//System.out.println("NULL");
-									games[eachClient] = new Protocolo();
+									games[eachClient] = new Protocol();
 									games[eachClient].state = "NOT_OK";
 								}else{
 									//System.out.println("NOT NULL");
-									games[eachClient] = new Protocolo();
+									games[eachClient] = new Protocol();
 									games[eachClient].state = "OK";
 
 									games[eachClient].arg1 =  main[eachClient];
@@ -197,21 +195,33 @@ public class Server{
 
 
 						//----- MSG END -----start
-						games[eachClient] = new Protocolo();
+						games[eachClient] = new Protocol();
 						games[eachClient].arg1 = main[eachClient];
 						games[eachClient].state = "END";
 
 						try{
-							//oos[eachClient].reset();
 							games[eachClient].envia(oos[eachClient]);
 						}catch(Exception e){
 							e.printStackTrace();
 						}
 						//----- MSG END -----end
+
+						//----- LOG SCORE -----start
+						if(main[eachClient].players[eachClient].active){	//Only one log is set per game
+							String s = "[" + date.toString() + "]\n" +  main[eachClient].players[0].name + " " + main[eachClient].playerOneScore + "-" + main[eachClient].playerTwoScore + " " + main[eachClient].players[1].name;
+
+							try(FileWriter fw = new FileWriter("scores.log", true);
+							    BufferedWriter bw = new BufferedWriter(fw);
+							    PrintWriter out = new PrintWriter(bw))
+							{
+							    out.println(s);
+							} catch (IOException e) {
+							    e.printStackTrace();
+							}
+						}
+						//----- LOG SCORE -----end
 					}
 				};
-				//System.out.println("Sai da thread!");
-
 				one[n].start();
 			}
 		} catch (Exception e){

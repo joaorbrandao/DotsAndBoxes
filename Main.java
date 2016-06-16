@@ -15,7 +15,6 @@ import java.awt.geom.*;
 import java.awt.event.*;
 import java.io.*;
 import java.net.*;
-//import org.apache.commons.lang.SerializationUtils;
 
 
 
@@ -35,7 +34,7 @@ public class Main extends JFrame implements MouseListener, MouseMotionListener, 
 
 	//DOTS
 	public Master dots[];					//Vetor para guardar todos os Dots
-	public final int DOT_NUMBER = 3;		//Define o numero de pontos do jogo
+	public final int DOT_NUMBER = 15;		//Define o numero de pontos do jogo
 	public final int DOT_SPACE =  20;		//Define o espaco entre cada ponto
 	public final int DOT_RADIUS = 6;		//Define o raio de cada ponto
 
@@ -454,7 +453,7 @@ public class Main extends JFrame implements MouseListener, MouseMotionListener, 
 			System.out.println("It's your turn!");
 			clickX = event.getX();
 			clickY = event.getY();
-			Protocolo a = new Protocolo();
+			Protocol a = new Protocol();
 			a.arg1 = (Object) clickX;
 			a.arg2 = (Object) clickY;
 			a.arg3 = (Object) mouseX;
@@ -507,7 +506,7 @@ public class Main extends JFrame implements MouseListener, MouseMotionListener, 
 
 		one = new Thread(){
 			public void run() {
-				Protocolo info = new Protocolo();
+				Protocol info = new Protocol();
 				try{
 					//----- MSG ID -----start
 					info.arg1 = /*(String)*/ players[0].name;
@@ -516,7 +515,7 @@ public class Main extends JFrame implements MouseListener, MouseMotionListener, 
 					//oosOut.reset();
 					info.envia(oosOut);
 					//info = info.recebe(oosIn);
-					info = Protocolo.recebe(oosIn);
+					info = Protocol.recebe(oosIn);
 					players = (Player []) info.arg1;
 					System.out.println("All players loaded!\n" + players[0].toString() + "\n" + players[1].toString());
 
@@ -528,7 +527,7 @@ public class Main extends JFrame implements MouseListener, MouseMotionListener, 
 						if(!players[clientId].active){
 							System.out.println("It's NOT your turn!");
 							try{
-								info = new Protocolo();
+								info = new Protocol();
 								info.state = "TURN_FALSE";
 								//oosOut.reset();
 								info.envia(oosOut);
@@ -541,8 +540,8 @@ public class Main extends JFrame implements MouseListener, MouseMotionListener, 
 						}
 
 						try{
-							info = new Protocolo();
-							info = Protocolo.recebe(oosIn);
+							info = new Protocol();
+							info = Protocol.recebe(oosIn);
 						}catch(Exception e){
 							e.printStackTrace();
 						}
@@ -575,8 +574,8 @@ public class Main extends JFrame implements MouseListener, MouseMotionListener, 
 
 
 					//----- MSG END -----start
-					info = new Protocolo();
-					info = Protocolo.recebe(oosIn);
+					info = new Protocol();
+					info = Protocol.recebe(oosIn);
 					Main controller = new Main(true);
 					controller = (Main) info.arg1;
 

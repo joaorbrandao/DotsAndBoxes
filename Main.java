@@ -35,7 +35,7 @@ public class Main extends JFrame implements MouseListener, MouseMotionListener, 
 
 	//DOTS
 	public Master dots[];					//Vetor para guardar todos os Dots
-	public final int DOT_NUMBER = 5;		//Define o numero de pontos do jogo
+	public final int DOT_NUMBER = 3;		//Define o numero de pontos do jogo
 	public final int DOT_SPACE =  20;		//Define o espaco entre cada ponto
 	public final int DOT_RADIUS = 6;		//Define o raio de cada ponto
 

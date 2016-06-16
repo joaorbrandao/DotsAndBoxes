@@ -152,11 +152,16 @@ public class Server{
 								main[eachClient].mouseX = (int) games[eachClient].arg3;
 								main[eachClient].mouseY = (int) games[eachClient].arg4;
 
-								//System.out.println(main[eachClient].clickX + " ");
 
-								setController(main[eachClient]);
+								Main auxCtrl = new Main(true);
+								auxCtrl = getController();
+								auxCtrl.clickX = main[eachClient].clickX;
+								auxCtrl.clickY = main[eachClient].clickY;
+								auxCtrl.mouseX = main[eachClient].mouseX;
+								auxCtrl.mouseY = main[eachClient].mouseY;
+								setController(auxCtrl);
 
-								main[eachClient] = setLine(main[eachClient], eachClient);
+								main[eachClient] = setLine(auxCtrl, eachClient);
 
 
 
@@ -202,7 +207,6 @@ public class Server{
 						}catch(Exception e){
 							e.printStackTrace();
 						}
-
 						//----- MSG END -----end
 					}
 				};

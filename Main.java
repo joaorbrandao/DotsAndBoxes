@@ -15,6 +15,7 @@ import java.awt.geom.*;
 import java.awt.event.*;
 import java.io.*;
 import java.net.*;
+import javax.sound.sampled.*;
 
 
 
@@ -34,7 +35,7 @@ public class Main extends JFrame implements MouseListener, MouseMotionListener, 
 
 	//DOTS
 	public Master dots[];					//Vetor para guardar todos os Dots
-	public final int DOT_NUMBER = 15;		//Define o numero de pontos do jogo
+	public final int DOT_NUMBER = 2;		//Define o numero de pontos do jogo
 	public final int DOT_SPACE =  20;		//Define o espaco entre cada ponto
 	public final int DOT_RADIUS = 6;		//Define o raio de cada ponto
 
@@ -78,6 +79,9 @@ public class Main extends JFrame implements MouseListener, MouseMotionListener, 
 	static Socket client;
 	static ObjectInputStream oosIn;
 	static ObjectOutputStream oosOut;
+
+	//sound
+	private final String SOUND_FILE_PATH = "./sound/win.wav";
 
 	public FirstPage firstPage;
 	public Main(String p){
@@ -371,12 +375,46 @@ public class Main extends JFrame implements MouseListener, MouseMotionListener, 
 
 	public void endGame(){
 		if(playerOneScore < playerTwoScore){
+			if(clientId == 1){
+				//Toca musiquinha de vitoria
+				AudioInputStream music;
+				try{
+					URL link = this.getClass().getClassLoader().getResource(SOUND_FILE_PATH);
+					music = AudioSystem.getAudioInputStream(link);
+					Clip song = AudioSystem.getClip();
+					song.open(music);
+					song.start();
+				}catch(UnsupportedAudioFileException er){
+					er.printStackTrace();
+				}catch(IOException er){
+					er.printStackTrace();
+				}catch(LineUnavailableException er){
+					er.printStackTrace();
+				}
+			}
 			JOptionPane.showMessageDialog(this, players[1].name + " Won!", "Game Over", JOptionPane.PLAIN_MESSAGE);
 		}
 		if(playerOneScore == playerTwoScore){
 			JOptionPane.showMessageDialog(this, "It's a draw!", "Game Over", JOptionPane.PLAIN_MESSAGE);
 		}
 		if(playerOneScore > playerTwoScore){
+			if(clientId == 0){
+				//Toca musiquinha de vitoria
+				AudioInputStream music;
+				try{
+					URL link = this.getClass().getClassLoader().getResource(SOUND_FILE_PATH);
+					music = AudioSystem.getAudioInputStream(link);
+					Clip song = AudioSystem.getClip();
+					song.open(music);
+					song.start();
+				}catch(UnsupportedAudioFileException er){
+					er.printStackTrace();
+				}catch(IOException er){
+					er.printStackTrace();
+				}catch(LineUnavailableException er){
+					er.printStackTrace();
+				}
+			}
 			JOptionPane.showMessageDialog(this, players[0].name + " Won!", "Game Over", JOptionPane.PLAIN_MESSAGE);
 		}
 

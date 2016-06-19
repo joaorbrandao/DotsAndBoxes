@@ -1,10 +1,13 @@
 /*
+Joao Brandao
+2015/2016
+
 
 
 ----- MASTER -----
 
-Esta classe permite criar as formas desejadas: pequenos quadrados (Dots),
-rectanculos (Lines) e quadrados maiores (Boxes).
+This class allows to create shapes: squares (Dots),
+rectangles (Lines) e bigger squares (Boxes).
 
 */
 
@@ -17,14 +20,14 @@ class Master implements Serializable{
 
 	//Campos
 	Rectangle shape;
-	Color color;	//Define a cor do objeto a desenhar
+	Color color;	//Define object color
 	int locationX;
 	int locationY;
 	int width;
 	int height;
 
 	public Master(){
-		//Inicia todos os campos
+		//initialize fields
 		color = Color.BLACK;
 		locationX = 0;
 		locationY = 0;
@@ -32,7 +35,7 @@ class Master implements Serializable{
 		height = 0;
 	}
 
-	//Metodo para criar o Retangulo (Dots, Line ou Box)
+	//Method to create a rectangle (Dots, Line ou Box)
 	public void createShape(){
 		shape = new Rectangle(locationX, locationY, width, height);
 	}

@@ -1,3 +1,16 @@
+/*
+Joao Brandao
+2015/2016
+
+
+
+----- PROTOCOL -----
+
+This class allows the communication between
+clients and server.
+
+*/
+
 import java.awt.*;
 import java.net.*;
 import java.io.*;
@@ -11,14 +24,16 @@ public class Protocol implements Serializable{
     Object arg4 = null;
     String state = null;
 
-    public void envia(ObjectOutputStream out) throws Exception
+    //Method to send info
+    public void send(ObjectOutputStream out) throws Exception
     {
         out.writeObject(this);
         out.flush();
         out.reset();
     }
 
-    public static Protocol recebe(ObjectInputStream in) throws Exception
+    //Method to receive info
+    public static Protocol receive(ObjectInputStream in) throws Exception
     {
         return (Protocol)in.readObject();
     }

@@ -1,13 +1,11 @@
 /*
-
+Joao Brandao
 2015/2016
 
 
 ----- FIRST PAGE -----
 
-Esta classe permite apresentar uma primeira janela para
-serem inseridos os nomes dos jogadores e selecionado o
-numero de pontos no tabuleiro.
+This class allows to present a first page like a menu.
 
 */
 
@@ -48,10 +46,10 @@ public class FirstPage extends JFrame implements ActionListener{
 
 	private MyDialog md = new MyDialog(this);
 	public FirstPage(){
-		super("Dots & Boxes"); //Escreve o nome do jogo na parte superior da tabela
+		super("Dots & Boxes");
 
 
-		//Define o tamanho da janela assim como a cor de fundo
+		//Set the frame size and color
 		setSize(500, 600);
 		setResizable(false);
 		setBackground(Color.WHITE);
@@ -70,7 +68,7 @@ public class FirstPage extends JFrame implements ActionListener{
 		validateNames = new JButton("Start Game!");
 		validateNames.addActionListener(this);
 
-		//Cria painel para adicionar componentes a janela
+		//Create JPanel to add the components to the frame
 		panel = new JPanel();
 		panel.setBackground(Color.WHITE);
 		panel.setLayout(new FlowLayout());
@@ -79,7 +77,7 @@ public class FirstPage extends JFrame implements ActionListener{
 		panel.add(playerOneName);
 		panel.add(validateNames);
 
-		add(panel);		//Adiciona o painel a janela
+		add(panel);
 
 		addWindowListener(new WindowAdapter(){
 			public void windowClosing(WindowEvent we) {
@@ -87,11 +85,10 @@ public class FirstPage extends JFrame implements ActionListener{
 			}
 		});
 
-		//Mostra a janela
 		setVisible(true);
 	}
 
-	//Metodo para iniciar novo jogo
+	//Method to start new game
 	public void newGame(){
 		setVisible(false);
 		dispose();
@@ -161,10 +158,8 @@ public class FirstPage extends JFrame implements ActionListener{
 	public void actionPerformed(ActionEvent arg0) {
 		if(playerOneName.getText().equals("") == false){
 				playerName = playerOneName.getText();
-
 				newGame();
 		}
-		//System.out.println(playerOneName.getText() + "\n" + players[0].toString() + "\n" + playerTwoName.getText() + "\n" + players[1].toString());
 	}
 
 

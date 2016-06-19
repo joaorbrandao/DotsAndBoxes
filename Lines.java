@@ -1,13 +1,15 @@
 /*
+Joao Brandao
+2015/2016
+
 
 
 ----- LINES -----
 
-Esta classe permite que cada Line tenha as suas proprias
-caracteristicas como um numero que informa a sua ordem,
-uma variavel boolean para identificar se a Line se encontra
-conectada e o tipo, podendo este ultimo ser horizontal ou
-vertical.
+This class allows that each Line as its own properties:
+- Order number
+- Boolean flag to check if closed
+- Number to set if horizontal ou vertical.
 
 */
 import java.awt.Color;
@@ -15,9 +17,9 @@ import java.awt.Color;
 public class Lines extends Master{
 	private static final long serialVersionUID = 1L;
 
-	int order;				//Para ordenar as linhas para debug na atribuicao destas as caixas
-	boolean connected;		//Para registar se a linha est selecionada
-	int type;				//Para identificar se e linha horizontal (0) ou vertical (1)
+	int order;
+	boolean connected;
+	int type;				//horizontal (0) | vertical (1)
 
 	public Lines(){
 		super();

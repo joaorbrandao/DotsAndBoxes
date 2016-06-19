@@ -44,8 +44,9 @@ public class FirstPage extends JFrame implements ActionListener{
 
 	public String playerName;
 
+	private String SCORES_FILE_PATH = "scoresClt.log";
+
 	private MyDialog md = new MyDialog(this);
-	private FirstPage frame;
 	public FirstPage(){
 		super("Dots & Boxes"); //Escreve o nome do jogo na parte superior da tabela
 
@@ -54,7 +55,6 @@ public class FirstPage extends JFrame implements ActionListener{
 		setSize(500, 600);
 		setResizable(false);
 		setBackground(Color.WHITE);
-		frame = this;
 		createMenu();
 
 		//Dots & Boxes Label
@@ -128,7 +128,7 @@ public class FirstPage extends JFrame implements ActionListener{
 		lastTenAction.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent event){
 				//Show last 10 Scores
-				try(FileReader fr = new FileReader("scores.log");
+				try(FileReader fr = new FileReader(SCORES_FILE_PATH);
 					BufferedReader br = new BufferedReader(fr)){
 					String line = null;
 					String auxLine[] = new String[10];
@@ -140,7 +140,7 @@ public class FirstPage extends JFrame implements ActionListener{
 							auxLine[position] = line;
 							position++;
 						}
-						if(lineNumber == 10)
+						if(lineNumber/2 == 10)
 							break;
 						System.out.println(line);
 					}

@@ -9,7 +9,6 @@ public class Protocol implements Serializable{
     Object arg2 = null;
     Object arg3 = null;
     Object arg4 = null;
-    Object arg5 = null;
     String state = null;
 
     public void envia(ObjectOutputStream out) throws Exception

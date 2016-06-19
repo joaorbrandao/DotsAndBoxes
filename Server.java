@@ -22,6 +22,7 @@ public class Server{
 	private Main controller;
 	private boolean gameOver;
 	public Date date;
+	private String SCORES_FILE_PATH = "scoresSrv.log";
 
 
 	public Server (int listenPort) throws IOException{
@@ -210,7 +211,7 @@ public class Server{
 						if(main[eachClient].players[eachClient].active){	//Only one log is set per game
 							String s = "[" + date.toString() + "]\n" +  main[eachClient].players[0].name + " " + main[eachClient].playerOneScore + "-" + main[eachClient].playerTwoScore + " " + main[eachClient].players[1].name;
 
-							try(FileWriter fw = new FileWriter("scores.log", true);
+							try(FileWriter fw = new FileWriter(SCORES_FILE_PATH, true);
 							    BufferedWriter bw = new BufferedWriter(fw);
 							    PrintWriter out = new PrintWriter(bw))
 							{

@@ -14,6 +14,7 @@ import java.awt.*;
 import java.awt.geom.*;
 import java.awt.event.*;
 import java.io.*;
+import java.util.*;
 import java.net.*;
 import javax.sound.sampled.*;
 
@@ -82,6 +83,8 @@ public class Main extends JFrame implements MouseListener, MouseMotionListener, 
 
 	//sound
 	private final String SOUND_FILE_PATH = "./sound/win.wav";
+	public Date date = new Date();
+	private String SCORES_FILE_PATH = "scoresClt.log";
 
 	public FirstPage firstPage;
 	public Main(String p){
@@ -418,6 +421,19 @@ public class Main extends JFrame implements MouseListener, MouseMotionListener, 
 			JOptionPane.showMessageDialog(this, players[0].name + " Won!", "Game Over", JOptionPane.PLAIN_MESSAGE);
 		}
 
+		//----- LOG SCORE -----start
+		String s = "[" + date.toString() + "]\n" +  players[0].name + " " + playerOneScore + "-" + playerTwoScore + " " + players[1].name;
+
+		try(FileWriter fw = new FileWriter(SCORES_FILE_PATH, true);
+			BufferedWriter bw = new BufferedWriter(fw);
+			PrintWriter out = new PrintWriter(bw))
+		{
+			out.println(s);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		//----- LOG SCORE -----end
+
 		setVisible(false);
 		dispose();
 		new FirstPage().setVisible(true);
@@ -550,9 +566,7 @@ public class Main extends JFrame implements MouseListener, MouseMotionListener, 
 					info.arg1 = /*(String)*/ players[0].name;
 					System.out.println(players[0].name);
 
-					//oosOut.reset();
 					info.envia(oosOut);
-					//info = info.recebe(oosIn);
 					info = Protocol.recebe(oosIn);
 					players = (Player []) info.arg1;
 					System.out.println("All players loaded!\n" + players[0].toString() + "\n" + players[1].toString());

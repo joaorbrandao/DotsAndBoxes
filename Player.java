@@ -1,12 +1,17 @@
 /*
-
-
+Joao Brandao
 2015/2016
+
 
 
 ----- PLAYER -----
 
-Esta classe permite criar caracteristicas de cada jogador.
+Tthis class allows that each player has its own properties:
+- If it is his turn
+- Id number
+- Color for lines
+- Color for Boxes
+- Score
 
 */
 

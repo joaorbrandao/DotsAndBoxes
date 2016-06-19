@@ -1,14 +1,16 @@
 /*
+Joao Brandao
+2015/2016
 
 
 
 ----- BOXES -----
 
-Esta classe permite que cada Box tenha as suas proprias
-caracteristicas como um numero que informa a sua ordem,
-uma variavel boolean para identificar se a Box se encontra
-fechada, o jogador que a fechou e dois vetores para armazenar
-as linhas horizontais e verticais a ela adjacentes.
+This class allows that each Box has its own properties:
+- Order number
+- Boolean flag to check if closed
+- Player number to save who have closed it
+- Adjacent vertical and horizontal lines.
 
 */
 
@@ -17,11 +19,11 @@ import java.awt.Color;
 public class Boxes extends Master{
 	private static final long serialVersionUID = 1L;
 
-	boolean closed;				//Para registar se a caixa foi fechada
-	Lines horizontalLines[];	//Para registar as linhas horizontais adjacentes a caixa
-	Lines verticalLines[];		//Para registar as linhas verticais adjacentes a caixa
-	int player;					//Para registar o jogador que fechou a caixa
-	int order;					//Para ordenar as caixas
+	boolean closed;
+	Lines horizontalLines[];
+	Lines verticalLines[];
+	int player;
+	int order;
 
 	public Boxes(){
 		super();
@@ -31,7 +33,7 @@ public class Boxes extends Master{
 		verticalLines = new Lines[2];
 	}
 
-	//Metodo para verificar o estado da caixa e fechar caso nao esteja fechada
+	//Method to check if box is closed
 	public boolean checkState(){
 		closed = true;
 		for(int i = 0; i < horizontalLines.length; i++) {

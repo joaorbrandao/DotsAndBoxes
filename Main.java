@@ -1,11 +1,13 @@
 /*
-
+JoaoBrandao
+2015/2016
 
 
 ----- MAIN -----
 
-Aqui e apresentada toda a logica da apresentacao assim
-como toda a logica da aplicacao.
+This class representes the main game frame. Here the
+players interact with the GUI to communicate with the
+server.
 
 */
 
@@ -14,8 +16,9 @@ import java.awt.*;
 import java.awt.geom.*;
 import java.awt.event.*;
 import java.io.*;
+import java.util.*;
 import java.net.*;
-//import org.apache.commons.lang.SerializationUtils;
+import javax.sound.sampled.*;
 
 
 
@@ -23,45 +26,45 @@ public class Main extends JFrame implements MouseListener, MouseMotionListener, 
 	private static final long serialVersionUID = 1L;
 
 	//WINDOW
-	public final int WINDOW_WIDTH = 500;	//Define a largura da janela
-	public final int WINDOW_HEIGHT = 600;	//Define a altura da janela
-	private Dimension dim;					//Dimensoes da janela
-	private int windowCenterX;				//Define o centro da janela em X
-	private int windowCenterY;				//Define o centro da janela em Y
+	public final int WINDOW_WIDTH = 500;	//Define frame width
+	public final int WINDOW_HEIGHT = 600;	//Define frame height
+	private Dimension dim;					//Frame dimensions
+	private int windowCenterX;				//Define frame center X
+	private int windowCenterY;				//Define frame center Y
 
 	//BOARD
-	private int boardSide;					//Define o tamanho de cada lado do "tabuleiro" ficticio para posicionar as formas
-	private int boardSpace;					//Define o espacamento para desenhar um novo ponto Largura do Ponto + Largura da Linha
+	private int boardSide;					//Define the size of the board to place the shapes
+	private int boardSpace;					//Define ths size of the space after which other dots should be draw
 
 	//DOTS
-	public Master dots[];					//Vetor para guardar todos os Dots
-	public final int DOT_NUMBER = 3;		//Define o numero de pontos do jogo
-	public final int DOT_SPACE =  20;		//Define o espaco entre cada ponto
-	public final int DOT_RADIUS = 6;		//Define o raio de cada ponto
+	public Master dots[];					//Dots array
+	public final int DOT_NUMBER = 2;		//Define number of dots
+	public final int DOT_SPACE =  20;		//Define space between dots
+	public final int DOT_RADIUS = 6;		//Define dot radius
 
 	//BOXES
-	public Boxes boxes[];					//Vetor para guardar todas as Boxes
+	public Boxes boxes[];					//Boxes array
 
 	//LINES
-	public int LINE_WIDTH;					//Define o comprimento das linhas
-	public Lines horizontalLines[];		//Vetor para guardar todas as Lines horizontais
-	public Lines verticalLines[];			//Vetor para guardar todas as Lines verticais
+	public int LINE_WIDTH;					//Define line width
+	public Lines horizontalLines[];			//Horizontal Lines array
+	public Lines verticalLines[];			//Vertical Lines array
 
 	//PLAYERS
 	public Player players[];
 
-	public final Color PLAYER_ONE_COLOR = new Color(255, 171, 0);		//Define a cor das Lines do jogador 1
-	public final Color PLAYER_ONE_COLOR_BOX = new Color(255, 205, 102);	//Define a cor das Boxes do jogador 1
-	public final Color PLAYER_TWO_COLOR = new Color(0, 162, 255);		//Define a cor das Lines do jogador 2
-	public final Color PLAYER_TWO_COLOR_BOX = new Color(130, 209, 255);	//Defina a cor das Boxes do jogador 2
+	public final Color PLAYER_ONE_COLOR = new Color(255, 171, 0);		//Define Player 1 Line color
+	public final Color PLAYER_ONE_COLOR_BOX = new Color(255, 205, 102);	//Define Player 1 Boxes color
+	public final Color PLAYER_TWO_COLOR = new Color(0, 162, 255);		//Define Player 2 Line color
+	public final Color PLAYER_TWO_COLOR_BOX = new Color(130, 209, 255);	//Define Player 2 Boxes color
 
-	public final int NUMBER_OF_PLAYERS = 2;
+	public final int NUMBER_OF_PLAYERS = 2;		//Set the maximum players
 
-	public int activePlayer;											//Para ir alterando qual e o jogador que este a jogar
-	public final int PLAYER_ONE = 1;									//Define um numero para o jogador 1
-	public final int PLAYER_TWO = 2;									//Define um numero para o jogador 2
-	public int playerOneScore;											//Contador das Boxes fechadas pelo PLAYER_ONE
-	public int playerTwoScore;											//Contador das Boxes fechadas pelo PLAYER_TWO
+	public int activePlayer;											//To change turns
+	public final int PLAYER_ONE = 1;									//Define player 1 number
+	public final int PLAYER_TWO = 2;									//Define player 2 number
+	public int playerOneScore;											//To keep player 1 score up to date
+	public int playerTwoScore;											//To keep player 2 score up to date
 
 	public boolean gameOver;		//To check if game ended
 
@@ -80,19 +83,23 @@ public class Main extends JFrame implements MouseListener, MouseMotionListener, 
 	static ObjectInputStream oosIn;
 	static ObjectOutputStream oosOut;
 
+	//sound
+	private final String SOUND_FILE_PATH = "./sound/win.wav";
+	public Date date = new Date();
+	private String SCORES_FILE_PATH = "scoresClt.log";
+
 	public FirstPage firstPage;
 	public Main(String p){
-		super("Dots & Boxes"); //Escreve o nome do jogo na parte superior da tabela
+		super("Dots & Boxes");
 
 
 		loadPlayers();
 		players[0].name = p;
 		players[1].name = "Waiting for an opponent...";
 
-		//Cria a janela de jogo
+		//Create game frame
 		createWindow();
 
-		//INICIAR DEFINICOES E TODAS AS VARIAVEIS
 		addMouseListener(this);
 		addMouseMotionListener(this);
 		addWindowListener(new WindowAdapter(){
@@ -104,12 +111,10 @@ public class Main extends JFrame implements MouseListener, MouseMotionListener, 
 		newGame();
 		connectToServer();
 
-		//Mostra a janela
 		setVisible(true);
 	}
 	public Main(boolean clean){
 		if(!clean){
-			//System.out.println("new Main NOT clean!");
 			loadPlayers();
 			createWindow();
 			addMouseListener(this);
@@ -127,25 +132,25 @@ public class Main extends JFrame implements MouseListener, MouseMotionListener, 
 	}
 
 
-	//Metodo para criar a janela de jogo
+	//Method to create game frame
 	private void createWindow(){
-		//Define o tamanho da janela assim como a cor de fundo
+		//Define frame size and color
 		setSize(WINDOW_WIDTH, WINDOW_HEIGHT);
 		setResizable(false);
 		setBackground(Color.WHITE);
 	}
 
-	//Metodo para iniciar os valores
+	//Method to initialize fields
 	private void initializeFields(){
 		dim = getSize();
-		windowCenterX = dim.width / 2;				//Obtem o centro em X
-		windowCenterY = (dim.height - 100) / 2;		//Obtem o centro em Y, mas deixando parte inferior da janela para informacoes do jogo
+		windowCenterX = dim.width / 2;				//get X center coordinates
+		windowCenterY = (dim.height - 100) / 2;		//get Y center coordinates livind space to game info
 
-		//Define o tabuleiro de jogo
+		//Define board game
 		boardSide = DOT_RADIUS * DOT_NUMBER + (DOT_NUMBER - 1) * DOT_SPACE;
 		boardSpace = DOT_RADIUS + DOT_SPACE;
 
-		LINE_WIDTH = DOT_SPACE - 2;					//Tira um pixel a cada extremidade da linha
+		LINE_WIDTH = DOT_SPACE - 2;					//take a pixel for each side of the line
 
 		activePlayer = PLAYER_ONE;
 		playerOneScore = 0;
@@ -206,15 +211,12 @@ public class Main extends JFrame implements MouseListener, MouseMotionListener, 
 	  --------------------------------------
 	*/
 	private void loadLines(){
-		//Como nos dedos do homem! 5 dedos ha 4 espacos entre eles!
-		//Assim, em DOT_NUMBER pontos ha DOT_NUMBER-1 espacos
 		horizontalLines = new Lines[(DOT_NUMBER-1)*DOT_NUMBER];
 		verticalLines = new Lines[(DOT_NUMBER-1)*DOT_NUMBER];
 
 		/*System.out.println("\n--------------------------------------");
 		System.out.println("-          HORIZONTAL LINES          -");
 		System.out.println("--------------------------------------");*/
-		//Carrega as linhas horizontais
 		for(int rows = 0; rows < DOT_NUMBER; rows++){
 			for(int cols = 0; cols < (DOT_NUMBER-1); cols++){
 				Lines line = new Lines();
@@ -237,7 +239,6 @@ public class Main extends JFrame implements MouseListener, MouseMotionListener, 
 		/*System.out.println("\n------------------------------------");
 		System.out.println("-          VERTICAL LINES          -");
 		System.out.println("------------------------------------");*/
-		//Carrega as linhas verticais
 		for(int rows = 0; rows < DOT_NUMBER-1; rows++){
 			for(int cols = 0; cols < DOT_NUMBER; cols++){
 				Lines line = new Lines();
@@ -316,7 +317,7 @@ public class Main extends JFrame implements MouseListener, MouseMotionListener, 
 				int i = rows * (DOT_NUMBER-1) + cols;
 				int j = rows * (DOT_NUMBER) + cols;
 				box.order = i;
-				//Atribuicao das linhas adjacentes a cada caixa
+				//Set adjacent lines of each box
 				box.horizontalLines[0] = horizontalLines[i];
 				box.horizontalLines[1] = horizontalLines[i + (DOT_NUMBER - 1)];
 				box.verticalLines[0] = verticalLines[j];
@@ -372,14 +373,61 @@ public class Main extends JFrame implements MouseListener, MouseMotionListener, 
 
 	public void endGame(){
 		if(playerOneScore < playerTwoScore){
+			if(clientId == 1){
+				//Play victory music
+				AudioInputStream music;
+				try{
+					URL link = this.getClass().getClassLoader().getResource(SOUND_FILE_PATH);
+					music = AudioSystem.getAudioInputStream(link);
+					Clip song = AudioSystem.getClip();
+					song.open(music);
+					song.start();
+				}catch(UnsupportedAudioFileException er){
+					er.printStackTrace();
+				}catch(IOException er){
+					er.printStackTrace();
+				}catch(LineUnavailableException er){
+					er.printStackTrace();
+				}
+			}
 			JOptionPane.showMessageDialog(this, players[1].name + " Won!", "Game Over", JOptionPane.PLAIN_MESSAGE);
 		}
 		if(playerOneScore == playerTwoScore){
 			JOptionPane.showMessageDialog(this, "It's a draw!", "Game Over", JOptionPane.PLAIN_MESSAGE);
 		}
 		if(playerOneScore > playerTwoScore){
+			if(clientId == 0){
+				//Play victory music
+				AudioInputStream music;
+				try{
+					URL link = this.getClass().getClassLoader().getResource(SOUND_FILE_PATH);
+					music = AudioSystem.getAudioInputStream(link);
+					Clip song = AudioSystem.getClip();
+					song.open(music);
+					song.start();
+				}catch(UnsupportedAudioFileException er){
+					er.printStackTrace();
+				}catch(IOException er){
+					er.printStackTrace();
+				}catch(LineUnavailableException er){
+					er.printStackTrace();
+				}
+			}
 			JOptionPane.showMessageDialog(this, players[0].name + " Won!", "Game Over", JOptionPane.PLAIN_MESSAGE);
 		}
+
+		//----- LOG SCORE -----start
+		String s = "[" + date.toString() + "]\n" +  players[0].name + " " + playerOneScore + "-" + playerTwoScore + " " + players[1].name;
+
+		try(FileWriter fw = new FileWriter(SCORES_FILE_PATH, true);
+			BufferedWriter bw = new BufferedWriter(fw);
+			PrintWriter out = new PrintWriter(bw))
+		{
+			out.println(s);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		//----- LOG SCORE -----end
 
 		setVisible(false);
 		dispose();
@@ -387,14 +435,14 @@ public class Main extends JFrame implements MouseListener, MouseMotionListener, 
 	}
 
 
-	//Metodo para desenhar a informacao do jogo
+	//Method to draw game info
 	private void drawInfoBox(Graphics g){
 		Graphics2D g2 = (Graphics2D) g;
 
 		g2.draw(new Rectangle2D.Double(20, 460, 460, 100));
 
 		String status = null;
-		if(players[0].active){//activePlayer == 1){
+		if(players[0].active){
 			status = "Current Player: " + players[0].name;
 		}else{
 			status = "Current Player: " + players[1].name;
@@ -454,7 +502,7 @@ public class Main extends JFrame implements MouseListener, MouseMotionListener, 
 			System.out.println("It's your turn!");
 			clickX = event.getX();
 			clickY = event.getY();
-			Protocolo a = new Protocolo();
+			Protocol a = new Protocol();
 			a.arg1 = (Object) clickX;
 			a.arg2 = (Object) clickY;
 			a.arg3 = (Object) mouseX;
@@ -462,7 +510,7 @@ public class Main extends JFrame implements MouseListener, MouseMotionListener, 
 			a.state = "TURN_TRUE";
 			try{
 				//oosOut.reset();
-				a.envia(oosOut);
+				a.send(oosOut);
 			}catch(Exception e){
 				e.printStackTrace();
 			}
@@ -507,16 +555,14 @@ public class Main extends JFrame implements MouseListener, MouseMotionListener, 
 
 		one = new Thread(){
 			public void run() {
-				Protocolo info = new Protocolo();
+				Protocol info = new Protocol();
 				try{
 					//----- MSG ID -----start
-					info.arg1 = /*(String)*/ players[0].name;
+					info.arg1 =  players[0].name;
 					System.out.println(players[0].name);
 
-					//oosOut.reset();
-					info.envia(oosOut);
-					//info = info.recebe(oosIn);
-					info = Protocolo.recebe(oosIn);
+					info.send(oosOut);
+					info = Protocol.receive(oosIn);
 					players = (Player []) info.arg1;
 					System.out.println("All players loaded!\n" + players[0].toString() + "\n" + players[1].toString());
 
@@ -528,10 +574,9 @@ public class Main extends JFrame implements MouseListener, MouseMotionListener, 
 						if(!players[clientId].active){
 							System.out.println("It's NOT your turn!");
 							try{
-								info = new Protocolo();
+								info = new Protocol();
 								info.state = "TURN_FALSE";
-								//oosOut.reset();
-								info.envia(oosOut);
+								info.send(oosOut);
 							}catch(Exception e){
 								e.printStackTrace();
 							}
@@ -541,8 +586,8 @@ public class Main extends JFrame implements MouseListener, MouseMotionListener, 
 						}
 
 						try{
-							info = new Protocolo();
-							info = Protocolo.recebe(oosIn);
+							info = new Protocol();
+							info = Protocol.receive(oosIn);
 						}catch(Exception e){
 							e.printStackTrace();
 						}
@@ -559,10 +604,8 @@ public class Main extends JFrame implements MouseListener, MouseMotionListener, 
 							playerOneScore = controller.playerOneScore;
 							playerTwoScore = controller.playerTwoScore;
 
-							//System.out.println("CTRL\n" + controller.players[0].toString() + controller.players[1].toString());
 							System.out.println("PLAYERS\n" + players[0].toString() + players[1].toString());
 							System.out.println("-----PLAYER " + clientId + ": " + players[clientId].active);
-							//System.out.println("Game Over? " + gameOver);
 
 						}
 						if(info.state.equals("NOT_OK")){
@@ -575,8 +618,8 @@ public class Main extends JFrame implements MouseListener, MouseMotionListener, 
 
 
 					//----- MSG END -----start
-					info = new Protocolo();
-					info = Protocolo.recebe(oosIn);
+					info = new Protocol();
+					info = Protocol.receive(oosIn);
 					Main controller = new Main(true);
 					controller = (Main) info.arg1;
 

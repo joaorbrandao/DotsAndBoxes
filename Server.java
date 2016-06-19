@@ -1,9 +1,20 @@
+/*
+Joao Brandao
+2015/2016
+
+
+----- SERVER -----
+
+This class deals with the application logic.
+
+*/
+
 import java.io.*;
 import java.net.*;
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
-//import org.apache.commons.lang.SerializationUtils;
+import java.util.*;
 
 public class Server{
 
@@ -15,12 +26,14 @@ public class Server{
 	protected ObjectInputStream  in[] = new ObjectInputStream[DIM];
 	protected ServerSocket SocketEscuta;
 	protected Socket [] sockets = new Socket[DIM];
-	protected Protocolo [] games = new Protocolo[DIM];
+	protected Protocol [] games = new Protocol[DIM];
 	public Player players[];
-	Thread one[];
-	int n = -1;
+	private Thread one[];
+	private int n = -1;
 	private Main controller;
 	private boolean gameOver;
+	public Date date;
+	private String SCORES_FILE_PATH = "scoresSrv.log";
 
 
 	public Server (int listenPort) throws IOException{
@@ -29,11 +42,9 @@ public class Server{
 		one = new Thread[DIM];
 		controller = new Main(false);
 		gameOver = false;
-		System.out.println("Running at: " + listenPort);
+		date = new Date();
+		System.out.println("----- " + date.toString() + " -----\n" + "Running at: " + listenPort);
 	}
-	/*public Server(){
-
-	}*/
 
 
 
@@ -56,8 +67,6 @@ public class Server{
 			while ( n < DIM ){
 				sockets[n + 1] = SocketEscuta.accept();
 				n++;
-
-				//System.out.println(n);
 
 				oos[n] = new ObjectOutputStream(sockets[n].getOutputStream());
 				in[n] = new ObjectInputStream(sockets[n].getInputStream());
@@ -84,8 +93,8 @@ public class Server{
 
 						do{
 							try{
-								games[eachClient] = new Protocolo();
-								games[eachClient] = Protocolo.recebe(in[eachClient]);
+								games[eachClient] = new Protocol();
+								games[eachClient] = Protocol.receive(in[eachClient]);
 							}catch(Exception er){
 								er.printStackTrace();
 							}
@@ -102,9 +111,7 @@ public class Server{
 
 							try{
 								games[eachClient].arg1 = players;
-								//oos[eachClient].reset();
-								games[eachClient].envia(oos[eachClient]);
-								//System.out.println("P1 - " + players[0].name + " | P2 - " + players[1].name);
+								games[eachClient].send(oos[eachClient]);
 								if(players[1].name != null){
 									flag = false;
 								}
@@ -113,8 +120,6 @@ public class Server{
 							}
 						}while(flag);
 
-
-						System.out.println(eachClient + ": Break bitches! :D");
 						main[eachClient].players = players;
 						setController(main[eachClient]);
 						System.out.println("P1 - " + controller.players[0].name + " | P2 - " + controller.players[1].name);
@@ -125,21 +130,20 @@ public class Server{
 						//----- MSG PLAY -----start
 						while(!gameOver){
 							try{
-								games[eachClient] = new Protocolo();
-								games[eachClient] = Protocolo.recebe(in[eachClient]);//games[eachClient].recebe(in[eachClient]);	//Recebe coordenadas X e Y onde jogador clica
+								games[eachClient] = new Protocol();
+								games[eachClient] = Protocol.receive(in[eachClient]);//games[eachClient].receive(in[eachClient]);	//Recebe coordenadas X e Y onde jogador clica
 							}catch(Exception e){
 								e.printStackTrace();
 							}
 
 							if(games[eachClient].state.equals("TURN_FALSE")){
-								games[eachClient] = new Protocolo();
+								games[eachClient] = new Protocol();
 								games[eachClient].state = "OK";
 
 								games[eachClient].arg1 =  getController();
 
 								try{
-									//oos[eachClient].reset();
-									games[eachClient].envia(oos[eachClient]);
+									games[eachClient].send(oos[eachClient]);
 
 								}catch(Exception e){
 									e.printStackTrace();
@@ -166,52 +170,56 @@ public class Server{
 
 
 								if(main[eachClient] == null){
-									//System.out.println("NULL");
-									games[eachClient] = new Protocolo();
+									games[eachClient] = new Protocol();
 									games[eachClient].state = "NOT_OK";
 								}else{
-									//System.out.println("NOT NULL");
-									games[eachClient] = new Protocolo();
+									games[eachClient] = new Protocol();
 									games[eachClient].state = "OK";
 
 									games[eachClient].arg1 =  main[eachClient];
 
 									setController(main[eachClient]);
-
-
-									//System.out.println("X: " + main[eachClient].clickX + " | Y: " + main[eachClient].clickY);
 								}
 								try{
-									//oos[eachClient].reset();
-									games[eachClient].envia(oos[eachClient]);	//Envia alteracoes
+									games[eachClient].send(oos[eachClient]);	//Send game changes
 
 								}catch(Exception e){
 									e.printStackTrace();
 								}
 								main[eachClient] = getController();
-
-								//System.out.println("Game Over? " + main[eachClient].gameOver);
 							}
 						}
 						//----- MSG PLAY -----end
 
 
 						//----- MSG END -----start
-						games[eachClient] = new Protocolo();
+						games[eachClient] = new Protocol();
 						games[eachClient].arg1 = main[eachClient];
 						games[eachClient].state = "END";
 
 						try{
-							//oos[eachClient].reset();
-							games[eachClient].envia(oos[eachClient]);
+							games[eachClient].send(oos[eachClient]);
 						}catch(Exception e){
 							e.printStackTrace();
 						}
 						//----- MSG END -----end
+
+						//----- LOG SCORE -----start
+						if(main[eachClient].players[eachClient].active){	//Only one log is set per game
+							String s = "[" + date.toString() + "]\n" +  main[eachClient].players[0].name + " " + main[eachClient].playerOneScore + "-" + main[eachClient].playerTwoScore + " " + main[eachClient].players[1].name;
+
+							try(FileWriter fw = new FileWriter(SCORES_FILE_PATH, true);
+							    BufferedWriter bw = new BufferedWriter(fw);
+							    PrintWriter out = new PrintWriter(bw))
+							{
+							    out.println(s);
+							} catch (IOException e) {
+							    e.printStackTrace();
+							}
+						}
+						//----- LOG SCORE -----end
 					}
 				};
-				//System.out.println("Sai da thread!");
-
 				one[n].start();
 			}
 		} catch (Exception e){
@@ -230,7 +238,7 @@ public class Server{
 	  -         APLICATION LOGIC           -
 	  --------------------------------------
 	*/
-	//Metodo para ativar uma Line que foi clicada
+	//Method to activate the clicked line
 	public synchronized Main setLine(Main localCtrl, int clt){
 		Lines line = getLine(localCtrl.clickX, localCtrl.clickY);
 
@@ -259,8 +267,6 @@ public class Server{
 						localCtrl.boxes[i].color = localCtrl.PLAYER_ONE_COLOR_BOX;
 						localCtrl.boxes[i].closed = true;
 						localCtrl.playerOneScore++;
-
-						//System.out.println("\nLAST BOX:\n"+boxes[i].toString());
 					}
 				}
 			}else{
@@ -280,8 +286,6 @@ public class Server{
 						localCtrl.boxes[i].color = localCtrl.PLAYER_TWO_COLOR_BOX;
 						localCtrl.boxes[i].closed = true;
 						localCtrl.playerTwoScore++;
-
-						//System.out.println("\nLAST BOX:\n"+boxes[i].toString());
 					}
 				}
 			}
@@ -307,7 +311,7 @@ public class Server{
 		return localCtrl;
 	}
 
-	//Metodo para obter Line de acordo as coordenadas do rato
+	//Method to get the line at the coordinates sent by the player
 	private Lines getLine(int x, int y){
 		for(int i = 0; i < getController().horizontalLines.length; i++){
 			if(getController().horizontalLines[i].shape.contains(x, y)){
@@ -323,7 +327,7 @@ public class Server{
 		return null;
 	}
 
-	//Metodo para obter o estado de todas as Boxes
+	//Method to get all the boxes status (open or closed)
 	private boolean[] getBoxesStatus(){
 		boolean status [] = new boolean[getController().boxes.length];
 
@@ -334,7 +338,7 @@ public class Server{
 		return status;
 	}
 
-	//Metodo para atualizar campos das Boxes
+	//Method to update boxes
 	private Main updateBoxes(Lines line, Main localCtrl){
 		for(int i = 0; i < localCtrl.boxes.length; i++){
 			if(line.type == 0){
@@ -356,7 +360,7 @@ public class Server{
 		return localCtrl;
 	}
 
-	//Metodo para verificar se o jogo terminou
+	//Method to check game over
 	private void checkGameOver(Main localCtrl){
 		boolean status[] = getBoxesStatus();
 		boolean gameOver = true;
